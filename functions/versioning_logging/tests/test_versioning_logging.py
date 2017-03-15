@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import mock
 import unittest
 from moto import mock_s3
 from main import get_s3_client, get_s3_resource, get_region_name, \
-    bucket_generator, enable_versioning, buckets_in_same_region
+    bucket_generator, enable_versioning, buckets_in_same_region, \
+    get_log_bucket_for_region
 
 
 class TestS3(unittest.TestCase):
@@ -234,3 +236,23 @@ class TestS3(unittest.TestCase):
             # regions.
 
         self.assertEqual(mock_get_region_name.call_count, bucket_count)
+
+    def test_get_log_bucket_for_region(self):
+        test_data = [
+            {
+                'var_name': 'BUCKET_us-east-1',
+                'var_value': 'bkt1',
+                'region': 'us-east-1'
+            },
+            {
+                'var_name': 'BUCKET_ap-southeast-1',
+                'var_value': 'bkt2',
+                'region': 'ap-southeast-1'
+            }
+        ]
+        for data in test_data:
+            # Set env var
+            os.environ[data.get('var_name')] = data.get('var_value')
+            # Check value
+            self.assertEqual(get_log_bucket_for_region(data.get('region')),
+                             data.get('var_value'))

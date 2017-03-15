@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
 import boto3
 import logging
 
@@ -40,7 +44,9 @@ def get_region_name(bucket_name):
 
     """
     response = get_s3_client().get_bucket_location(Bucket=bucket_name)
-    return response['LocationConstraint']
+    # For default region, US Standard, LocationConstraint is empty.
+    # Return 'us-east-1' when no data is available.
+    return response['LocationConstraint'] or 'us-east-1'
 
 
 def bucket_generator():
@@ -84,6 +90,8 @@ def enable_logging(source_bucket_name, target_bucket_name):
 
 def buckets_in_same_region(x_bucket_name, y_bucket_name):
     """Checks if x and y buckets are in the same region.
+    This would be used if no region-wise log buckets are specified, to validate
+    if x can have y as the target logging bucket.
 
     :param x_bucket_name: Name of bucket x.
     :type x_bucket_name: str
@@ -98,3 +106,18 @@ def buckets_in_same_region(x_bucket_name, y_bucket_name):
     if get_region_name(x_bucket_name) == get_region_name(y_bucket_name):
         return True
     return False
+
+
+def get_log_bucket_for_region(region):
+    """Returns log bucket assigned for a particular region.
+    This is required to add logging target bucket in the same region bucket.
+
+    :param region: AWS region name.
+    :type region: str
+
+    :return: Name of bucket assigned for logs in the given region.
+    :rtype: str or NoneType
+
+    """
+    env_var_name = "BUCKET_" + region
+    return os.getenv(env_var_name)

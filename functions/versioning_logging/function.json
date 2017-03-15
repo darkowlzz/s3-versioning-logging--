@@ -2,5 +2,9 @@
   "description": "Enable S3 bucket versioning and logging.",
   "hooks": {
     "build": "pip install -r requirements.txt -t ."
+  },
+  "environment": {
+    "BUCKET_us-east-1": "",
+    "BUCKET_ap-southeast-1": ""
   }
 }
