@@ -111,3 +111,63 @@ class TestS3(unittest.TestCase):
             for bkt in data['buckets']:
                 bkt_ver = client.get_bucket_versioning(Bucket=bkt['name'])
                 self.assertEqual(bkt_ver['Status'], 'Enabled')
+
+
+    @mock_s3
+    def test_enable_logging(self):
+        # NEED HELP: Couldn't test this due to limitations in receiving
+        # logging info of buckets. Only `ResponseMetadata` is returned, but
+        # logging info, even for the buckets with logging enabled.
+
+        pass
+        # test_data = [
+        #     {
+        #         'target_bucket': 'bkt1',
+        #         'buckets': [
+        #             {
+        #                 'name': 'bkt1',
+        #                 'logging_enabled': True,
+        #                 'expected_target_prefix': 'bkt1/'
+        #             },
+        #             {
+        #                 'name': 'bkt2',
+        #                 'logging_enabled': False,
+        #                 'expected_target_prefix': 'bkt2/'
+        #             }
+        #         ]
+        #     }
+        # ]
+        # resource = get_s3_resource()
+        # client = get_s3_client()
+        # for data in test_data:
+        #     # Create buckets with required config
+        #     for bkt in data['buckets']:
+        #         bucket = resource.create_bucket(Bucket=bkt['name'])
+        #         if bkt['logging_enabled']:
+        #             client.put_bucket_logging(
+        #                 Bucket=bkt['name'],
+        #                 BucketLoggingStatus={
+        #                     'LoggingEnabled': {
+        #                         'TargetBucket': data['target_bucket'],
+        #                         'TargetPrefix': bkt['name'] + '/'
+        #                     }
+        #                 }
+        #             )
+        #
+        #     # Enable logging
+        #     for bkt in data['buckets']:
+        #         enable_logging(bkt['name'], data['target_bucket'])
+        #
+        #     # Check if versioning is enabled
+        #     for bkt in data['buckets']:
+        #         bkt_log = client.get_bucket_logging(Bucket=bkt['name'])
+        #         log_enabled = bkt_log.get('LoggingEnabled')
+        #         # Versioning should be enabled
+        #         self.assertNotEqual(log_enabled, None)
+        #         if log_enabled:
+        #             # TargetBucket should be set
+        #             self.assertEqual(log_enabled['TargetBucket'],
+        #                              data['target_bucket'])
+        #             # TargetPrefix should be set
+        #             self.assertEqual(log_enabled['TargetPrefix'],
+        #                              bkt['expected_target_prefix'])

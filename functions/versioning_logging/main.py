@@ -71,4 +71,12 @@ def enable_logging(source_bucket_name, target_bucket_name):
     :type target_bucket_name: str
 
     """
-    pass
+    get_s3_client().put_bucket_logging(
+        Bucket=source_bucket_name,
+        BucketLoggingStatus={
+            'LoggingEnabled': {
+                'TargetBucket': target_bucket_name,
+                'TargetPrefix': source_bucket_name + '/'
+            }
+        }
+    )
