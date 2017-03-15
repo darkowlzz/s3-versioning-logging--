@@ -7,4 +7,5 @@ install:
 
 script:
   - cd functions/versioning_logging
+  - flake8
   - python -m unittest discover

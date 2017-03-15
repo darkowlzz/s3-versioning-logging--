@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import boto3
 import unittest
 from moto import mock_s3
 from main import get_s3_client, get_s3_resource, get_region_name, \
-    bucket_generator, enable_versioning, enable_logging
+    bucket_generator, enable_versioning
 
 
 class TestS3(unittest.TestCase):
@@ -15,7 +14,7 @@ class TestS3(unittest.TestCase):
         bucket_name = 'dummy-bucket-for-test'
         bucket_region = 'us-east-1'
         resource = get_s3_resource()
-        bucket = resource.create_bucket(
+        resource.create_bucket(
             Bucket=bucket_name,
             CreateBucketConfiguration={
                 'LocationConstraint': bucket_region
@@ -99,7 +98,7 @@ class TestS3(unittest.TestCase):
         for data in test_data:
             # Create buckets with required config
             for bkt in data['buckets']:
-                bucket = resource.create_bucket(Bucket=bkt['name'])
+                resource.create_bucket(Bucket=bkt['name'])
                 if bkt['versioning_enabled']:
                     resource.BucketVersioning(bkt['name']).enable()
 
@@ -111,7 +110,6 @@ class TestS3(unittest.TestCase):
             for bkt in data['buckets']:
                 bkt_ver = client.get_bucket_versioning(Bucket=bkt['name'])
                 self.assertEqual(bkt_ver['Status'], 'Enabled')
-
 
     @mock_s3
     def test_enable_logging(self):
