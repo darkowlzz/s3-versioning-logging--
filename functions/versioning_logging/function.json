@@ -1,0 +1,6 @@
+{
+  "description": "Enable S3 bucket versioning and logging.",
+  "hooks": {
+    "build": "pip install -r requirements.txt -t ."
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "name": "s3_versioning_logging",
+  "description": "Enable S3 versioning and logging"
+}

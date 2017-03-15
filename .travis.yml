@@ -1,0 +1,10 @@
+language: python
+
+python: 2.7
+
+install:
+  - pip install -r functions/versioning_logging/requirements.dev
+
+script:
+  - cd functions/versioning_logging
+  - python -m unittest discover
