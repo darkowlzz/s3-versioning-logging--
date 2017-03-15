@@ -80,3 +80,21 @@ def enable_logging(source_bucket_name, target_bucket_name):
             }
         }
     )
+
+
+def buckets_in_same_region(x_bucket_name, y_bucket_name):
+    """Checks if x and y buckets are in the same region.
+
+    :param x_bucket_name: Name of bucket x.
+    :type x_bucket_name: str
+
+    :param y_bucket_name: Name of bucket y.
+    :type y_bucket_name: str
+
+    :return: True if both the buckets are in the same region. False otherwise.
+    :rtype: bool
+
+    """
+    if get_region_name(x_bucket_name) == get_region_name(y_bucket_name):
+        return True
+    return False

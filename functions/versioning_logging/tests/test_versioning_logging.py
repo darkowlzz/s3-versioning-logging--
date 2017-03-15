@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import mock
 import unittest
 from moto import mock_s3
 from main import get_s3_client, get_s3_resource, get_region_name, \
-    bucket_generator, enable_versioning
+    bucket_generator, enable_versioning, buckets_in_same_region
 
 
 class TestS3(unittest.TestCase):
@@ -169,3 +170,67 @@ class TestS3(unittest.TestCase):
         #             # TargetPrefix should be set
         #             self.assertEqual(log_enabled['TargetPrefix'],
         #                              bkt['expected_target_prefix'])
+
+    @mock_s3
+    @mock.patch('main.get_region_name')
+    def test_buckets_in_same_region(self, mock_get_region_name):
+        test_data = [
+            {
+                'buckets': [
+                    {
+                        'name': 'bkt1',
+                        'region': 'ap-southeast-1'
+                    },
+                    {
+                        'name': 'bkt2',
+                        'region': 'ap-southeast-1'
+                    }
+                ],
+                # 'expected_result': True
+            },
+            {
+                'buckets': [
+                    {
+                        'name': 'bkt1',
+                        'region': 'us-east-1'
+                    },
+                    {
+                        'name': 'bkt2',
+                        'region': 'ap-southeast-1'
+                    }
+                ],
+                # 'expected_result': False
+            }
+        ]
+
+        # def side_effect(name):
+        #     return bkt_region_map.get(name)
+
+        bucket_count = 0
+
+        for data in test_data:
+            # bkt_region_map = {}
+
+            for bkt in data['buckets']:
+                bucket_count += 1
+                # bkt_region_map[bkt['name']] = bkt['region']
+                get_s3_client().create_bucket(
+                    Bucket=bkt['name'],
+                    CreateBucketConfiguration={
+                        'LocationConstraint': bkt['region']
+                    }
+                )
+
+            # mock_get_region_name.return_value = MagicMock(
+            #     side_effect=side_effect
+            # )
+            bucket_x = data['buckets'][0]['name']
+            bucket_y = data['buckets'][1]['name']
+            buckets_in_same_region(bucket_x, bucket_y)
+            # self.assertEqual(buckets_in_same_region(bucket_x, bucket_y),
+            #    data['expected_result'])
+            # NEED HELP: Unable to test the result of `buckets_in_same_region`
+            # because moto is not able to create multiple buckets at differnt
+            # regions.
+
+        self.assertEqual(mock_get_region_name.call_count, bucket_count)
