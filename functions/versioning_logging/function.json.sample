@@ -1,5 +1,7 @@
 {
   "description": "Enable S3 bucket versioning and logging.",
+  "role": "",
+  "timeout": 300,
   "hooks": {
     "build": "pip install -r requirements.txt -t ."
   },

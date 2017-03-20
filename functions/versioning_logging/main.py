@@ -3,7 +3,6 @@
 
 import os
 import boto3
-import traceback
 import logging
 from botocore.exceptions import ClientError
 
@@ -18,11 +17,8 @@ s3_resource = None
 
 def handle(event, context):
     """Lambda handler"""
-    try:
-        bucket_list, target_bucket = initialize()
-        start_versioning_logging(bucket_list, target_bucket)
-    except:
-        logger.error(traceback.format_exc())
+    bucket_list, target_bucket = initialize()
+    start_versioning_logging(bucket_list, target_bucket)
 
     return
 
@@ -98,7 +94,7 @@ def enable_versioning(bucket_name):
     get_s3_resource().BucketVersioning(bucket_name).enable()
 
 
-def enable_logging(source_bucket_name, target_bucket_name):
+def enable_logging(source_bucket_name, target_bucket_name, exc_handle=True):
     """Enable logging for a source bucket in a target bucket with prefix
     as the name of source bucket.
 
@@ -107,6 +103,10 @@ def enable_logging(source_bucket_name, target_bucket_name):
 
     :param target_bucket_name: Bucket in which logs would be stored.
     :type target_bucket_name: str
+
+    :param exc_handle: Handle exception. Used to avoid handling exception on
+                       consequent execution.
+    :type exc_handle: bool
 
     :param target_bucket_name: Bucket where the logs would be stored.
     :type target_bucket_name: str
@@ -138,12 +138,16 @@ def enable_logging(source_bucket_name, target_bucket_name):
             }
         )
     except ClientError:
-        # For exceptions due to lack of logging permission
-        set_bucket_permissions(target_bucket_name)
-        # Try enabling again
-        enable_logging(source_bucket_name, target_bucket_name)
-    except:
-        logger.error(traceback.format_exc())
+        if exc_handle:
+            # For exceptions due to lack of logging permission
+            set_bucket_permissions(target_bucket_name)
+            # Try enabling again
+            enable_logging(source_bucket_name, target_bucket_name, False)
+        else:
+            # Raise error when exception handling is explicitly False
+            # This is helpful in avoiding recursive calls to itself on multiple
+            # exceptions.
+            raise
 
 
 def buckets_in_same_region(x_bucket_name, y_bucket_name):
