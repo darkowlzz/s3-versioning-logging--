@@ -16,7 +16,7 @@ s3_client = None
 s3_resource = None
 
 
-def handler(event, context):
+def handle(event, context):
     """Lambda handler"""
     try:
         bucket_list, target_bucket = initialize()
@@ -241,4 +241,4 @@ def start_versioning_logging(bucket_list=None, target_bucket=None):
 
 
 if __name__ == '__main__':
-    handler(None, None)
+    handle(None, None)
