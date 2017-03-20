@@ -4,7 +4,9 @@
     "build": "pip install -r requirements.txt -t ."
   },
   "environment": {
-    "BUCKET_us-east-1": "",
-    "BUCKET_ap-southeast-1": ""
+    "TARGET_us_east_1": "",
+    "TARGET_ap_southeast_1": "",
+    "TARGET_BUCKET":"",
+    "SOURCE_BUCKETS":""
   }
 }

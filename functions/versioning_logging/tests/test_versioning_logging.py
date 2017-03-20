@@ -45,7 +45,7 @@ class TestS3(unittest.TestCase):
             # Get buckets one by one
             while True:
                 current_bucket = next(bg, None)
-                if current_bucket is not None:
+                if current_bucket:
                     all_buckets.append(current_bucket.name)
                 else:
                     break
@@ -240,12 +240,12 @@ class TestS3(unittest.TestCase):
     def test_get_log_bucket_for_region(self):
         test_data = [
             {
-                'var_name': 'BUCKET_us-east-1',
+                'var_name': 'TARGET_us_east_1',
                 'var_value': 'bkt1',
                 'region': 'us-east-1'
             },
             {
-                'var_name': 'BUCKET_ap-southeast-1',
+                'var_name': 'TARGET_ap_southeast_1',
                 'var_value': 'bkt2',
                 'region': 'ap-southeast-1'
             }
