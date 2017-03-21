@@ -13,6 +13,7 @@ logger.setLevel(logging.INFO)
 
 s3_client = None
 s3_resource = None
+IGNORE_BUCKETS = []
 
 
 def handle(event, context):
@@ -43,6 +44,12 @@ def initialize():
         target_bucket = os.getenv('TARGET_BUCKET')
     else:
         target_bucket = None
+
+    # Ignore buckets
+    global IGNORE_BUCKETS
+    if 'IGNORE_BUCKETS' in os.environ:
+        ignore_bucket_list = os.getenv('IGNORE_BUCKETS')
+        IGNORE_BUCKETS = [x.strip() for x in ignore_bucket_list.split(',')]
 
     return (bucket_list, target_bucket)
 
@@ -204,9 +211,41 @@ def set_bucket_permissions(bucket_name):
     )
 
 
+def is_versioning_enabled(bucket_name):
+    """Checks if versioning is enabled in a bucket.
+
+    :param bucket_name: Name of bucket.
+    :type bucket_name: str
+
+    :return: Result of versioning enabled check.
+    :rtype: bool
+
+    """
+    status = get_s3_client().get_bucket_versioning(Bucket=bucket_name)
+    if status['Status'] == 'Enabled':
+        return True
+    return False
+
+
+def is_logging_enabled(bucket_name):
+    """Checks if logging is enabled in a bucket.
+
+    :param bucket_name: Name of bucket.
+    :type bucket_name: str
+
+    :return: Result of logging enabled check.
+    :rtype: bool
+
+    """
+    status = get_s3_client().get_bucket_logging(Bucket=bucket_name)
+    if 'LoggingEnabled' in status:
+        return True
+    return False
+
+
 def enable_versioning_logging(bucket_name=None, target_bucket=None):
     """Enables versioning and logging for the provided bucket_name and
-    with target_bucket.
+    with target_bucket. Ignores buckets in IGNORE_BUCKETS list.
 
     :param bucket_name: Name of source bucket on which versioning and logging
                         is required.
@@ -217,8 +256,11 @@ def enable_versioning_logging(bucket_name=None, target_bucket=None):
     :type target_bucket: str
 
     """
-    enable_versioning(bucket_name)
-    enable_logging(bucket_name, target_bucket)
+    if bucket_name not in IGNORE_BUCKETS:
+        if not is_versioning_enabled(bucket_name):
+            enable_versioning(bucket_name)
+        if not is_logging_enabled(bucket_name):
+            enable_logging(bucket_name, target_bucket)
 
 
 def start_versioning_logging(bucket_list=None, target_bucket=None):

@@ -6,7 +6,7 @@
   account).
 * Target bucket(s) is/are obtained from (env var).
 * All the buckets are iterated one-by-one and versioning and logging is enabled
-  in each one of them.
+  in each one of them, considering `IGNORE_BUCKETS` list.
 * This is run frequently at a given time to ensure all the buckets (including
   newly created buckets) have logging and versioning enabled as per the
   requirements for consistency.
@@ -42,6 +42,14 @@
   target buckets should be set.
 
 
+## Ignore Buckets
+
+* Ignore buckets are the buckets that should be ignore. This could also include
+  the buckets that contain logs of other buckets.
+* This should be specified as a comma separated list of bucket names.
+* All the buckets in this list would be ignored by this function.
+
+
 ## Detailed Flow
 
 When the function runs,
@@ -56,10 +64,12 @@ When the function runs,
 * Once the correct target bucket name is inferred, logging is enabled for
   bucket, with log target prefix same as the source bucket name. If no proper
   target bucket in the right region is found, enabling logging would not be
-  enabled for the particular source bucket. But this won't fail and stop the
-  whole function, silent failure.
+  enabled for the particular source bucket and would crash the whole function.
+  It is designed to crash so that function failures don't happen silently, but
+  cloudwatch alarms can be raised on failures.
 * Versioning is enabled along with logging. Versioning doesn't required any
-  extra info, unlink logging.
+  extra info, unlink logging. If versioning or logging is already enabled in a
+  bucket, nothing would be changed.
 * If the target bucket doesn't has the required permission for Log Delivery
   group to deliver logs, permission is automatically added.
   NOTE: This could even remove any existing permissions on the target bucket.

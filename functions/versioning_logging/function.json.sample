@@ -9,6 +9,7 @@
     "TARGET_us_east_1": "",
     "TARGET_ap_southeast_1": "",
     "TARGET_BUCKET":"",
-    "SOURCE_BUCKETS":""
+    "SOURCE_BUCKETS":"",
+    "IGNORE_BUCKETS":""
   }
 }
