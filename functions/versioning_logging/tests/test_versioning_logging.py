@@ -7,7 +7,7 @@ import unittest
 from moto import mock_s3
 from main import get_s3_client, get_s3_resource, get_region_name, \
     bucket_generator, enable_versioning, buckets_in_same_region, \
-    get_log_bucket_for_region
+    get_log_bucket_for_region, is_versioning_enabled, is_logging_enabled
 
 
 class TestS3(unittest.TestCase):
@@ -256,3 +256,43 @@ class TestS3(unittest.TestCase):
             # Check value
             self.assertEqual(get_log_bucket_for_region(data.get('region')),
                              data.get('var_value'))
+
+    def test_is_versioning_enabled(self):
+        test_data = [
+            {
+                'Status': 'Enabled',
+                'expected_result': True
+            },
+            {
+                'expected_result': False
+            },
+            {
+                'Status': 'Suspended',
+                'expected_result': False
+            }
+        ]
+        client = get_s3_client()
+        for data in test_data:
+            client.get_bucket_versioning = mock.Mock(
+                return_value=data
+            )
+            self.assertEqual(is_versioning_enabled('foo'),
+                             data['expected_result'])
+
+    def test_is_logging_enabled(self):
+        test_data = [
+            {
+                'LoggingEnabled': 'somestring',
+                'expected_result': True
+            },
+            {
+                'expected_result': False
+            }
+        ]
+        client = get_s3_client()
+        for data in test_data:
+            client.get_bucket_logging = mock.Mock(
+                return_value=data
+            )
+            self.assertEqual(is_logging_enabled('foo'),
+                             data['expected_result'])
