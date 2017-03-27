@@ -222,7 +222,7 @@ def is_versioning_enabled(bucket_name):
 
     """
     status = get_s3_client().get_bucket_versioning(Bucket=bucket_name)
-    if status['Status'] == 'Enabled':
+    if status.get('Status') == 'Enabled':
         return True
     return False
 
